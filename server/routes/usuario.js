@@ -1,5 +1,11 @@
 /* IMPORTACION DE EXPRES */
 const express = require('express');
+
+/* ENCRIPTADOR DE UNA SOLA VIA, BCRYPT */
+const bcrypt = require('bcrypt');
+
+
+
 const app = express();
 
 
@@ -39,6 +45,9 @@ app.get('/usuario', function(req, res) {
 //     }
 // });
 
+
+/* FUNCION DE CUANDO SE ENVIA POR X-WWW-FORM-URLENCODED - BODY-PARSE*/
+
 app.post('/usuario', function(req, res) {
 
     /* BODY CUANDO SE ENVIA POR X-WWW-FORM-URLENCODED - BODY-PARSE*/
@@ -49,7 +58,7 @@ app.post('/usuario', function(req, res) {
     let usuario = new Usuario({
         nombre: body.nombre,
         email: body.email,
-        password: body.password,
+        password: bcrypt.hashSync(body.password, 10),
         role: body.role
     });
 

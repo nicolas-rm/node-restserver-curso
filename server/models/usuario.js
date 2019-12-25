@@ -55,6 +55,16 @@ let usuarioSchema = new Schema({
 });
 
 
+/* MODIFICAR EL JSON PARA ELIMINAR LA IMPRESION DE LA CONTRASEÑA */
+
+usuarioSchema.methods.toJSON = function() {
+    let user = this;
+    let userObject = user.toObject();
+    delete userObject.password;
+
+    return userObject;
+};
+
 usuarioSchema.plugin(uniqueValidator, { message: '{PATH} debe de ser unico' });
 /* PARAMETROS: NOMBRE DEL ESQUEMA, CONFIGURACIONES DEL ESQUEMA */
 module.exports = mongoose.model('Usuario', usuarioSchema);
