@@ -76,6 +76,8 @@ app.post('/usuario', function(req, res) {
         });
     });
 });
+
+
 /* PETICIONES PUT - ACTUALIZAR*/
 app.put('/usuario', function(req, res) {
     res.json('PUT - USUARIO');
@@ -88,11 +90,30 @@ app.put('/usuario/:id', function(req, res) {
      ** params: parametros
      ** :X : nombre del parametro
      */
+
+    /* ACTUALIZAR UN REGISTRO */
     let id = req.params.id;
-    res.json({
-        peticion: 'PUT - USUARIO - ID',
-        id: id
+    let body = req.body;
+
+    Usuario.findByIdAndUpdate(id, body, { new: true, runValidators: true }, (err, usuariodb) => {
+
+
+        /* RESPUESTA DE ERROR */
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                err: err
+            });
+        }
+
+        /* RESPUESTA CORRECTA */
+        res.status(200).json({
+            ok: true,
+            peticion: 'USUARIO ACTUALIZADO - ID',
+            usuario: usuariodb
+        });
     });
+
 
 });
 
