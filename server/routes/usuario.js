@@ -5,6 +5,8 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 
 
+/* FILTRADOR PARA ELIMINAR CAMPOS AL MOMENTO DE EDITAR */
+const _ = require('underscore');
 
 const app = express();
 
@@ -91,9 +93,21 @@ app.put('/usuario/:id', function(req, res) {
      ** :X : nombre del parametro
      */
 
-    /* ACTUALIZAR UN REGISTRO */
+    /* ACTUALIZAR UN REGISTRO FORMA 1*/
+    /* let id = req.params.id;
+    let body = req.body; */
+
+    /* ACTUALIZAR UN REGISTRO FORMA 2*/
     let id = req.params.id;
-    let body = req.body;
+    /* EL _.pick: para filtrar que es lo que se va a editar */
+    let body = _.pick(req.body, ['nombre', 'email', 'img', 'role', 'estado']);
+
+
+
+    /* FORMA 1 DE INHABILITAR LOS DATOS CUANDO NO SE DEBEN DE EDITAR*/
+
+    delete body.password;
+    delete body.google;
 
     Usuario.findByIdAndUpdate(id, body, { new: true, runValidators: true }, (err, usuariodb) => {
 
