@@ -21,7 +21,47 @@ app.get('/', function(req, res) {
 
 
 app.get('/usuario', function(req, res) {
-    res.json('GET - USUARIO');
+
+    /* PAGINACION (OPCIONAL) skip */
+    let desde = req.params.desde || 0;
+    desde = Number(desde);
+
+    /* LIMITE CANTIDAD DE DATOS POR PAGINA (limit)*/
+    let limite = req.params.limite || 5;
+    limite = Number(limite);
+
+    /* skip() : para mostrar de 5 en 5 los datos, limit: limite de datos por paginacion  */
+    Usuario.find({})
+        .skip(desde)
+        .limit(limite)
+        .exec((err, usuarios) => {
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    err: err
+                });
+            }
+
+
+            /* CUANTA LA CANTIDAD DE DOCUMENTOS O DE REGISTROS QUE ESTA DEVOLVIENDO */
+            Usuario.countDocuments({ estado: true }, (err, conteo) => {
+
+                res.json({
+                    ok: true,
+                    usuarios,
+                    cuantos: conteo
+                });
+
+            });
+
+            // res.status(200).json({
+            //     ok: true,
+            //     mensaje: 'GET - USUARIO',
+            //     usuarios: usuarios
+            // });
+
+        });
+    // res.json('GET - USUARIO');
 });
 
 
@@ -99,7 +139,7 @@ app.put('/usuario/:id', function(req, res) {
 
     /* ACTUALIZAR UN REGISTRO FORMA 2*/
     let id = req.params.id;
-    /* EL _.pick: para filtrar que es lo que se va a editar */
+    /* EL _.pick: para filtrar que es lo que se va a editar, datos para filtrar del esquema de usuario */
     let body = _.pick(req.body, ['nombre', 'email', 'img', 'role', 'estado']);
 
 
