@@ -23,18 +23,33 @@ app.get('/', function(req, res) {
 app.get('/usuario', function(req, res) {
 
     /* PAGINACION (OPCIONAL) skip */
-    let desde = req.params.desde || 0;
+    let desde = req.query.desde || 0;
     desde = Number(desde);
 
     /* LIMITE CANTIDAD DE DATOS POR PAGINA (limit)*/
-    let limite = req.params.limite || 5;
+    let limite = req.query.limite || 5;
     limite = Number(limite);
 
+    /* FILTRO DE CONDICIONES DE MOONGOOSE */
+    /* DEBE DE IR LOS ATRIBUTOS DE LA COLECCION */
+    /* google: true */
+
+
+    let condiciones = {
+        estado: true
+    };
     /* skip() : para mostrar de 5 en 5 los datos, limit: limite de datos por paginacion  */
-    Usuario.find({})
+
+    /* FILTRO DE CAMPOS EN LA PETICION GET */
+    /* SON LOS CAMPOS DE LA RESPECTIVA COLECCION */
+    let campos = 'nombre email role estado google img';
+
+
+    Usuario.find(condiciones, campos)
         .skip(desde)
         .limit(limite)
         .exec((err, usuarios) => {
+
             if (err) {
                 return res.status(400).json({
                     ok: false,
@@ -44,9 +59,9 @@ app.get('/usuario', function(req, res) {
 
 
             /* CUANTA LA CANTIDAD DE DOCUMENTOS O DE REGISTROS QUE ESTA DEVOLVIENDO */
-            Usuario.countDocuments({ estado: true }, (err, conteo) => {
+            Usuario.countDocuments(condiciones, (err, conteo) => {
 
-                res.json({
+                res.status(200).json({
                     ok: true,
                     usuarios,
                     cuantos: conteo
@@ -89,7 +104,7 @@ app.get('/usuario', function(req, res) {
 
 
 /* FUNCION DE CUANDO SE ENVIA POR X-WWW-FORM-URLENCODED - BODY-PARSE*/
-
+/* METODO POST - AGREGAR / AÑADIR */
 app.post('/usuario', function(req, res) {
 
     /* BODY CUANDO SE ENVIA POR X-WWW-FORM-URLENCODED - BODY-PARSE*/
@@ -126,10 +141,12 @@ app.put('/usuario', function(req, res) {
 });
 
 /* PETICIONES PUT CON ID */
+/* EDITAR / ACTUALIZAR */
 app.put('/usuario/:id', function(req, res) {
     /* 
      ** req: requerir lo que se envia 
      ** params: parametros
+     ** res: respuesta
      ** :X : nombre del parametro
      */
 
@@ -146,8 +163,8 @@ app.put('/usuario/:id', function(req, res) {
 
     /* FORMA 1 DE INHABILITAR LOS DATOS CUANDO NO SE DEBEN DE EDITAR*/
 
-    delete body.password;
-    delete body.google;
+    /* delete body.password;
+    delete body.google; */
 
     Usuario.findByIdAndUpdate(id, body, { new: true, runValidators: true }, (err, usuariodb) => {
 
@@ -173,8 +190,66 @@ app.put('/usuario/:id', function(req, res) {
 
 
 /* PETICIONES DELETE - ELIMINAR*/
-app.delete('/usuario', function(req, res) {
-    res.json('DELETE - USUARIO');
+app.delete('/usuario/:id', function(req, res) {
+    // res.json('DELETE - USUARIO');
+    let id = req.params.id;
+
+    /* ELIMINACION FISICA (DE LA BASE DE DATOS) */
+    // Usuario.findByIdAndRemove(id, (err, usuarioBorrado) => {
+
+    //     /* SI SE GENERA UN ERROR */
+    //     if (err) {
+    //         return res.status(400).json({
+    //             ok: false,
+    //             err: err
+    //         });
+    //     }
+
+    //     /* SI EL USUARIO NO ESTA */
+    //     if (!usuarioBorrado) {
+    //         return res.status(400).json({
+    //             ok: true,
+    //             err: {
+    //                 mensaje: 'USUARIO NO ENCONTRADO'
+    //             }
+    //         });
+    //     }
+
+    //     res.status(200).json({
+    //         ok: true,
+    //         usuario: usuarioBorrado
+    //     });
+    // });
+
+    /* DATO DIRECTO DEL ESTADO */
+    let estado = {
+        estado: false
+    };
+
+
+    /* ELIMINACION DE ESTADO (DE LA BASE DE DATOS) */
+    Usuario.findByIdAndUpdate(id, estado, { new: true, runValidators: true }, (err, usuarioBorrado) => {
+        if (err) {
+            res.status(400).json({
+                ok: false,
+                err: err
+            });
+        }
+
+        if (!usuarioBorrado) {
+            return res.status(400).json({
+                ok: false,
+                err: {
+                    mensaje: 'USUARIO NO ENCONTRADO'
+                }
+            });
+        }
+
+        res.status(400).json({
+            ok: true,
+            usuario: usuarioBorrado
+        });
+    });
 });
 
 
